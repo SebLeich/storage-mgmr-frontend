@@ -1,0 +1,4 @@
+ContainerWidth,ContainerHeight,,,,,,,
+1700,1900,,,,,,,
+Order,Description,Quantity,Length,Width,Height,TurningAllowed,StackingAllowed,Group
+1,EuroPallet2,3,1200,800,1044,1,1,1

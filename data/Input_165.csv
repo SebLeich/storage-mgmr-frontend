@@ -1,0 +1,17 @@
+ContainerWidth,ContainerHeight,,,,,
+2450,2600,,,,,
+Order,Description,Quantity,Length,Width,Height,TurningAllowed,StackingAllowed,Group
+1,EuroPallet2,1,1200,800,1044,0,0,2
+2,EuroPallet6,1,1203,807,1800,0,0,2
+3,Tiny1,8,154,132,389,0,0,2
+4,Small3,4,402,308,1800,0,0,2
+5,Medium1,2,903,807,389,0,0,2
+6,Lengtharge3,1,1532,1234,1800,0,0,2
+7,LengthongThin,2,1532,308,1800,0,0,2
+8,EuroPallet2,1,1200,800,1044,0,0,1
+9,EuroPallet6,1,1203,807,1800,0,0,1
+10,Tiny1,8,154,132,389,0,0,1
+11,Small3,4,402,308,1800,0,0,1
+12,Medium1,2,903,807,389,0,0,1
+13,Lengtharge3,1,1532,1234,1800,0,0,1
+14,LengthongThin,2,1532,308,1800,0,0,1

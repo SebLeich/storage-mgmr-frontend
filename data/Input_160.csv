@@ -1,0 +1,13 @@
+ContainerWidth,ContainerHeight,,,,,
+2400,2500,,,,,
+Order,Description,Quantity,Length,Width,Height,TurningAllowed,StackingAllowed,Group
+1,RandomPallet,23,1200,132,1800,1,1,10
+2,RandomPallet,23,402,831,1044,1,1,9
+3,RandomPallet,23,1200,831,1800,1,1,8
+4,RandomPallet,23,1200,132,1044,1,1,7
+5,RandomPallet,23,1532,800,1044,1,1,6
+6,RandomPallet,23,402,831,1800,1,1,5
+7,RandomPallet,23,903,800,1044,1,1,4
+8,RandomPallet,23,154,1234,1044,1,1,3
+9,RandomPallet,23,402,1234,389,1,1,2
+10,RandomPallet,23,154,308,389,1,1,1

@@ -1,0 +1,357 @@
+body {
+    overflow: hidden;
+    padding: 0px;
+    margin: 0px;
+    font-family: 'Titillium Web', sans-serif;
+}
+.sortable-thead {
+    cursor: pointer;
+    user-select: none;
+}
+.navbar {
+    width: calc(100% - 20px);
+    background-color: rgba(0,0,0,.9);
+    color: white;
+    font-size: 20px;
+    vertical-align: middle;
+    padding: 10px;
+}
+.navbar .welcome-icon {
+    position: relative;
+    top: 4px;
+    margin-right: 5px;
+    margin-left: 10px;
+}
+.nav-label {
+    margin-right: 1rem;
+}
+.nav-item {
+    font-size: .8rem;
+    margin-left: 1rem;
+    cursor: pointer;
+}
+.nav-item:hover {
+    color: rgba(255, 255, 255, .8);
+}
+#user-input {
+    padding: 20px;
+    width: calc(100% - 40px);
+    height: calc(100% - 140px);
+    overflow-y: scroll;
+}
+.user-input-tab {
+    width: 100%;
+    border: none;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+.user-input-tab td {
+    margin-bottom: 20px;
+}
+.user-input-tab tr td:nth-child(1){
+    white-space: nowrap;
+}
+.user-input-tab td.input {
+    width: 100%;
+}
+input.user-input {
+    margin-left: 1rem;
+    min-width: 150px;
+    margin-bottom: 1rem;
+    padding: 1.5rem 1rem .3rem 1rem;
+    border: none;
+    border-bottom: 1px solid grey;
+    outline: none;
+}
+.footer-row {
+    position: absolute;
+    bottom: 0px;
+    width: calc(100% - 10px);
+    background-color: rgba(0, 0, 0, 0.14);
+    padding: 5px;
+    text-align: right;
+}
+.footer-row-btn {
+    display: inline-block;
+    z-index: 2;
+    padding: 0rem 1rem .5rem .5rem;
+    cursor: pointer;
+}
+.add-dataset-btn {
+    background-color: rgb(59, 121, 172);
+    color: white;
+}
+.send-input-btn {
+    background-color: rgb(47, 167, 47);
+    color: white;
+}
+.set-external-solution-btn {
+    background-color: rgb(43, 185, 130);
+    color: white;
+    display: none;
+}
+.send-input-to-server:not(.disabled):hover {
+    background-color: rgba(47, 167, 47, .7);
+}
+.send-input-to-server.disabled {
+    background-color: lightcoral;
+    cursor: not-allowed !important;
+}
+.footer-row-btn > span {
+    padding-top: .5rem;
+}
+.footer-row-btn .material-icons {
+    position: relative;
+    top: .4rem;
+    margin-right: .5rem;
+}
+.user-input-tab td.input::after {
+    content: "mm";
+    font-size: .5rem;
+    padding-left: 5px;
+    color: grey;
+}
+.after-m3::after {
+    content: "m³";
+    font-size: .5rem;
+    padding-left: 5px;
+    color: grey;
+}
+.after-m::after {
+    content: "m";
+    font-size: .5rem;
+    padding-left: 5px;
+    color: grey;
+}
+.st-mgr-tab {
+    width: calc(100% - 40px);
+    border: none;
+    border-collapse: collapse;
+    margin: 5px 20px 20px 20px;
+}
+#details {
+    width: 350px;
+    height: calc(100% - 51.6px);
+    background-color: white;
+    float: left;
+    display: none;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+#empty-details {
+    display: none;
+}
+#detailed-good-panel {
+    background-color: rgba(0,0,0,.8);
+    width: 100%;
+    display: none;
+}
+#current-solution {
+    width: 100%;
+}
+#current-groups {
+    display: none;
+}
+#upload-ext-sol {
+    display: none;
+}
+.empty-space-control-icon {
+    border-radius: 20px;
+    background-color: rgba(0,0,0,.7);
+    color: white;
+    cursor: pointer;
+}
+.empty-space-control-icon:hover {
+    background-color: rgba(0,0,0,.6);
+}
+#graphic {
+    height: calc(100% - 51.6px);
+    width: calc(100% - 350px);
+    float: left;
+    position: relative;
+    display: none;
+}
+#graphic-inner {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+#current-load {
+    padding: 30px 0px 30px 0px;
+    background-color: white;
+}
+.details-table {
+    font-size: .6rem;
+    white-space: nowrap;
+}
+.st-mgr-tab tr:not(.no-style):nth-child(even) {
+    background-color: rgb(246, 246, 246);
+}
+.details-table tr td:nth-child(2) {
+    text-align: left;
+}
+.details-table td {
+    padding: .2rem;
+}
+.invoker {
+    color: white;
+    position: absolute;
+    background-color: rgba(0,0,0,.6);
+    border-radius: 10px;
+    padding: 0px 5px 0px 5px;
+    user-select: none;
+}
+.invoker[data-dir="left"] {
+    top: calc(50% - 20px);
+    left: 0px;
+}
+.invoker[data-dir="right"] {
+    top: calc(50% - 20px);
+    right: 0px;
+}
+.invoker[data-action="control"] {
+    top: 5px;
+    left: calc(50% - 185px);
+}
+#touch-control {
+    bottom: 10px;
+    right: 10px;
+    border-radius: 50px;
+}
+.invoker > .material-icons {
+    padding: 3px;
+    cursor: pointer;
+    display: table-cell;
+    font-size: 1rem;
+}
+#touch-control > .material-icons {
+    font-size: 2rem;
+}
+.invoker > .material-icons.gap-right {
+    padding-right: 20px;
+}
+.invoker > .material-icons:hover {
+    color: rgb(0, 140, 255);
+}
+.section-invoker {
+    font-size: 1rem;
+    padding: .5rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+.section-invoker .material-icons {
+    margin-right: 5px;
+    font-size: .8rem;
+}
+#upload-file, #upload-sol {
+    display: none;
+}
+.sortable-table .sort-icon {
+    margin-left: 15px;
+    right: 5px;
+    font-size: .6rem;
+    border-radius: 10px;
+    position: relative;
+    top: 2px;
+}
+.sortable-table tbody tr:nth-child(odd) {
+    background-color: rgba(255, 255, 255, .4);
+}
+.orders-table {
+    width: 100%;
+    border-radius: 3px;
+    background-color: white;
+    border-collapse: collapse;
+    text-align: center;
+    font-size: .8rem;
+}
+.orders-table td.index {
+    background-color: rgba(67, 140, 182, 0.2);
+    color: white;
+    font-size: .6rem;
+}
+.orders-table td.bordered {
+    border: 1px solid lightgrey;
+}
+.orders-table tbody tr:not(.no-style):nth-child(odd) {
+    background-color: white;
+}
+.orders-table tbody tr:not(.no-style):nth-child(even) {
+    background-color: rgba(67, 140, 182, 0.1);
+}
+.orders-table .headline {
+    font-size: .7rem;
+    font-weight: normal;
+    background-color: rgba(67, 140, 182, 1);
+    color: white;
+}
+.orders-table .headline th {
+    padding: .5rem 2px .5rem 2px;
+    min-width: 10px;
+}
+.default-row {
+    font-size: .5rem;
+    font-weight: normal;
+    background-color: rgba(255, 255, 255, .7);
+    cursor: pointer;
+}
+.default-row th {
+    font-size: .4rem;
+    font-weight: normal;
+    padding-top: .3rem;
+    padding-bottom: .3rem;
+}
+
+.default-row .icon {
+    text-align: center;
+}
+.speaking-android {
+    font-size: 2rem !important;
+    color: white;
+}
+.speech-bubble {
+    position: relative;
+    background-color: rgba(255, 255, 255, .8);
+    border-radius: 3px;
+    padding: .5rem;
+    display: inline-block;
+    min-height: 40px;
+    margin: 10px 10px 10px 5px;
+}
+.speech-bubble, .speech-bubble * {
+    font-size: .7rem;
+}
+.speech-bubble-table td {
+    padding: 0px 0px 0px 20px;
+}
+.speech-bubble:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 0;
+    height: 0;
+    border: .5rem solid transparent;
+    border-right-color: rgba(255, 255, 255, .8);
+    border-left: 0;
+    border-top: 0;
+    margin-left: -.5rem;
+}
+.button {
+    width: 100%;
+    text-align: left;
+    font-size: .7rem;
+    padding: 0px;
+    cursor: pointer;
+    border: 0px solid rgba(0,0,0,.4);
+    color: rgba(0,0,0,.7);
+    background-color: #afafaf36;
+    font-weight: bold;
+}
+.button .icon {
+    font-size: .7rem;
+    margin-right: 5px;
+    background-color: rgba(0,0,0,.7);
+    color: white;
+    padding: 7px;
+}

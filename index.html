@@ -1,0 +1,151 @@
+<html>
+
+<head>
+    <meta charset="utf8" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="lib/material-icons-master/iconfont/material-icons.css" />
+    <link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet" />
+    <link href="lib/jquery-ui-1.12.1/jquery-ui.min.css" rel="stylesheet" />
+    <script src="lib/jquery.js"></script>
+    <script src="lib/jquery-ui-1.12.1/jquery-ui.min.js"></script>
+    <script src="js/mapping.js"></script>
+    <script src="lib/three.js-master/build/three.min.js"></script>
+    <script src="lib/OrbitControls.js"></script>
+    <script src="js/external.js"></script>
+    <script src="js/classes.js"></script>
+    <script src="lib/Chart.min.js"></script>
+    <script src="lib/jquery.signalR.js"></script>
+    <script src="lib/download.min.js"></script>
+</head>
+
+<body>
+    <div id="navbar" class="navbar">
+        <span class="nav-label">
+            <i class="material-icons welcome-icon">local_shipping</i>
+            Storagemanager
+        </span>
+        <span class="nav-item" data-action="upload-current-config">
+            Datei importieren (.csv)
+        </span>
+        <span class="nav-item" data-action="upload-solution">
+            Lösung hochladen (.json)
+        </span>
+        <span class="nav-item" style="display: none;" data-action="back-to-input">
+            Zurück zur Übersicht
+        </span>
+        <span class="nav-item" style="display: none;" data-action="show-empty">
+            Leerräume visualisieren
+        </span>
+        <span class="nav-item" style="display: none;" data-action="show-goods">
+            Güter visualisieren
+        </span>
+    </div>
+    <div id="user-input"></div>
+    <div class="footer-row">
+        <div id="ext-solution" class="footer-row-btn set-external-solution-btn">
+            <i class='material-icons'>input</i>
+            <span>Externe Lösung visualisieren</span>
+        </div>
+        <div id="add-dataset" class="footer-row-btn add-dataset-btn disabled">
+            <i class='material-icons'>add</i>
+            <span>Weiteren Datensatz anlegen</span>
+        </div>
+        <div id="send-input" class="footer-row-btn send-input-btn disabled">
+            <i class='material-icons'>play_arrow</i>
+            <span>Lösungen berechnen</span>
+        </div>
+    </div>
+    <div id="details">
+        <div id="detailed-good-panel"></div>
+        <div id="empty-details">
+            <div class="section-invoker">
+                <i class="material-icons">build</i>
+                Leerräume
+            </div>
+            <div style="width: 100%; text-align: center;">
+                <i class="material-icons empty-space-control-icon" data-target="add">add</i>
+                <i class="material-icons empty-space-control-icon" data-target="remove">remove</i>
+                <i class="material-icons empty-space-control-icon" data-target="next">chevron_right</i>
+                <i class="material-icons empty-space-control-icon" data-target="recent">chevron_left</i>
+                <i class="material-icons empty-space-control-icon" data-target="run">play_arrow</i>
+            </div>
+        </div>
+        <div class="section-invoker" data-target="current-solution">
+            <i class="material-icons">expand_more</i>
+            Aktueller Lösungsvorschlag
+        </div>
+        <div id="current-solution">
+            <canvas id="current-load" class="fixed"></canvas>
+        </div>
+        <div class="section-invoker" data-target="all-solutions">
+            <i class="material-icons">chevron_right</i>
+            Weitere Lösungsvorschläge
+        </div>
+        <div class="section-invoker" data-target="current-groups">
+            <i class="material-icons">chevron_right</i>
+            Gütergruppen
+        </div>
+        <div id="current-groups"></div>
+    </div>
+    <div id="graphic">
+        <div id="graphic-inner">
+            <div class="invoker" id="graphic-control-panel" data-action="control">
+                <i class="material-icons gap-right" data-action="defaultview">restore</i>
+                <i class="material-icons" data-action="zoom-in">zoom_in</i>
+                <i class="material-icons gap-right" data-action="zoom-out">zoom_out</i>
+                <i class="material-icons" data-action="upwards">arrow_upward</i>
+                <i class="material-icons" data-action="right">arrow_forward</i>
+                <i class="material-icons" data-action="downwards">arrow_downward</i>
+                <i class="material-icons gap-right" data-action="left">arrow_back</i>
+                <i class="material-icons" data-action="hide-grid">grid_off</i>
+                <i class="material-icons" data-action="from-top">assignment_return</i>
+                <i class="material-icons" data-action="from-side">assignment_returned</i>
+            </div>
+            <div class="invoker" id="touch-control">
+                <i class="material-icons">touch_app</i>
+            </div>
+        </div>
+    </div>
+    <input type="file" id="upload-file" accept=".csv" />
+    <input type="file" id="upload-sol" accept=".json" />
+    <input type="file" id="upload-ext-sol" accept=".csv" />
+    <script>
+        // LOCAL
+        var serverLocation = "localhost:65384";
+        // SERVER
+        //var serverLocation = "213.244.192.71:82";
+        var runtimeManager = new RuntimeManager();
+        var renderH = $("#graphic").height();
+        var renderW = $("#graphic").width();
+        var camera = new THREE.PerspectiveCamera(45, renderW / renderH, 1, 1000000);
+        camera.position.set(3000, 0, 4000);
+        var scene = new THREE.Scene();
+        scene.background = new THREE.Color("white");
+        var renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.domElement.id = "solution-preview";
+        renderer.setSize(renderW, renderH);
+        $("#graphic-inner").append(renderer.domElement);
+        var controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+        controls.dampingFactor = 0.25;
+        controls.screenSpacePanning = false;
+        controls.minDistance = 100;
+        controls.maxDistance = 100000;
+        controls.keys = {
+            LEFT: 37, //left arrow
+            UP: 38, // up arrow
+            RIGHT: 39, // right arrow
+            BOTTOM: 40 // down arrow
+        };
+        controls.rotateSpeed = 0.1;
+        var ray = new THREE.Raycaster();
+        animate();
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+
+</html>

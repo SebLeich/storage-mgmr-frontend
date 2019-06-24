@@ -1,0 +1,4 @@
+ContainerWidth,ContainerHeight,,,,,
+2450,2300,,,,,
+Order,Description,Quantity,Length,Width,Height,TurningAllowed,StackingAllowed,Group
+1,Tiny3,1000,154,132,1800,0,0,1
