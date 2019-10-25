@@ -19,7 +19,7 @@ class Drawable {
      */
     draw(parentDimension, options) {
         var helper = null;
-        var length = this.length;
+        var length = this.corrLength;
         if (length == null) {
             length = (parentDimension.l - this.z);
         }
@@ -37,14 +37,16 @@ class Drawable {
                     color = group.color;
                     groupId = group.id;
                 }
-                var geometry = new THREE.BoxGeometry(this.width, this.height, length, 4, 4, 4);
+                var geometry = new THREE.BoxGeometry(this.corrWidth, this.height, length, 4, 4, 4);
                 var material = new THREE.MeshBasicMaterial({ color: color });
                 this.mesh = new THREE.Mesh(geometry, material);
                 this.mesh.groupColor = color;
                 this.mesh.groupId = groupId;
+                this.mesh.seqNr = this.seqNr;
                 this.mesh.goodId = this.id;
                 helper = new THREE.EdgesHelper(this.mesh, 0x333333);
                 helper.material.linewidth = 1;
+                this.helper = helper;
                 break;
         }
         if (this.mesh != null) {
@@ -54,7 +56,7 @@ class Drawable {
                 this.mesh.position.z = this.z;
             } else {
                 this.mesh.position.z = this.z - (parentDimension.l / 2) + (length / 2);
-                this.mesh.position.x = this.x - (parentDimension.w / 2) + (this.width / 2);
+                this.mesh.position.x = this.x - (parentDimension.w / 2) + (this.corrWidth / 2);
                 this.mesh.position.y = this.y - (parentDimension.h / 2) + (this.height / 2);
             }
             scene.add(this.mesh);
@@ -110,6 +112,20 @@ class Container extends Drawable {
         this.goods.push(good);
     }
     /**
+     * updated 26.07.2019
+     * the method returns the corrected length of the instance
+     */
+    get corrLength() {
+        return this.length;
+    }
+    /**
+     * updated 26.07.2019
+     * the method returns the corrected width of the instance
+     */
+    get corrWidth() {
+        return this.width;
+    }
+    /**
      * updated 26.04.2019
      * the method draws the container to the view
      */
@@ -128,18 +144,9 @@ class Container extends Drawable {
         scene.add(gridHelper);
         runtimeManager.currentGridUUID = gridHelper.uuid;
         super.draw(null, { type: "bordered" });
-        /*
-        if (runtimeManager.drawEmpty) {
-            for (var index in runtimeManager.solutions[0].empty) {
-                runtimeManager.solutions[0].empty[index].draw({ l: this.length, w: this.width, h: this.height }, { type: "bordered" });
-            }
-        } else {
-            for (var index in this.goods) {
-                this.goods[index].draw({ h: this.height, w: this.width, l: this.length }, { type: "filled" });
-            }
-        }*/
         for (var index in this.goods) {
-            this.goods[index].draw({ h: this.height, w: this.width, l: this.length }, { type: "filled" });
+            var g = this.goods[index];
+            g.draw({ h: this.height, w: this.width, l: this.length }, { type: "filled" });
         }
     }
     /**
@@ -185,50 +192,6 @@ class Container extends Drawable {
     }
 }
 /**
- * updated 20.05.2019
- * the class contains an empty space
- */
-class Empty extends Drawable {
-    /**
-     * updated 20.05.2019
-     * the constructor creates a new instance of an empty space
-     */
-    constructor(object) {
-        super();
-        this.height = null;
-        this.length = null;
-        this.width = null;
-        this.x = null;
-        this.y = null;
-        this.z = null;
-        this.index = null;
-        this.group = "empty";
-        if (object != null && typeof (object) != "undefined") {
-            if (object._H != null && typeof (object._H) != "undefined") {
-                this.height = object._H;
-            }
-            if (object._W != null && typeof (object._W) != "undefined") {
-                this.width = object._W;
-            }
-            if (object._L != null && typeof (object._L) != "undefined") {
-                this.length = object._L;
-            }
-            if (object._X != null && typeof (object._X) != "undefined") {
-                this.x = object._X;
-            }
-            if (object._Y != null && typeof (object._Y) != "undefined") {
-                this.y = object._Y;
-            }
-            if (object._Z != null && typeof (object._Z) != "undefined") {
-                this.z = object._Z;
-            }
-            if (object.index != null && typeof (object.index) != "undefined") {
-                this.index = object.index;
-            }
-        }
-    }
-}
-/**
  * updated 26.04.2019
  * the class represents a good that is putted into a container
  */
@@ -251,6 +214,7 @@ class Good extends Drawable {
         this.isRotated = false;
         this.group = null;
         this.desc = null;
+        this.seqNr = null;
         if (object != null && typeof (object) != "undefined") {
             if (object._Height != null && typeof (object._Height) != "undefined") {
                 this.height = object._Height;
@@ -282,7 +246,33 @@ class Good extends Drawable {
             if (object._Rotate != null && typeof (object._Rotate) != "undefined") {
                 this.rotateable = object._Rotate;
             }
+            if (object._IsRotated != null && typeof (object._IsRotated) != "undefined") {
+                this.isRotated = object._IsRotated;
+            }
+            if (object._SequenceNr != null && typeof (object._SequenceNr) != "undefined") {
+                this.seqNr = object._SequenceNr;
+            }
         }
+    }
+    /**
+     * updated 26.07.2019
+     * the method returns the corrected length of the instance
+     */
+    get corrLength() {
+        if (this.isRotated) {
+            return this.width;
+        }
+        return this.length;
+    }
+    /**
+     * updated 26.07.2019
+     * the method returns the corrected width of the instance
+     */
+    get corrWidth() {
+        if (this.isRotated) {
+            return this.length;
+        }
+        return this.width;
     }
     /**
      * updated 26.04.2019
@@ -296,8 +286,8 @@ class Good extends Drawable {
      * the method generates a detailed preview of the good
      */
     generateDetailsLabel() {
-        var html = "<table><tr><td><i class='material-icons speaking-android'>android</i></td><td><div class='speech-bubble'>Das Frachtstück " + this.desc + " gehört zu der Gruppe " + this.group + ". Für die folgenden Eigenschaften habe ich die folgenden Koordinaten berechnet:<table class='speech-bubble-table'><tbody><tr><td>Länge:</td><td class='after-m'>" + Styler.styleM(this.length) + "</td></tr><tr><td>Breite:</td><td class='after-m'>" + Styler.styleM(this.width) + "</td></tr><tr><td>Höhe:</td><td class='after-m'>" + Styler.styleM(this.height) + "</td></tr><tr><td>Z-Koordinate (Länge):</td><td class='after-m'>" + Styler.styleM(this.z) + "</td></tr><tr><td>X-Koordinate (Tiefe):</td><td class='after-m'>" + Styler.styleM(this.x) + "</td></tr><tr><td>Y-Koordinate (Höhe):</td><td class='after-m'>" + Styler.styleM(this.y) + "</td></tr></tbody></table>";
-        if(this.isRotated){
+        var html = "<table><tr><td><i class='material-icons speaking-android'>android</i></td><td><div class='speech-bubble'>Das Frachtstück " + this.desc + " gehört zu der Gruppe " + this.group + ". Für die folgenden Eigenschaften habe ich die folgenden Koordinaten berechnet:<table class='speech-bubble-table'><tbody><tr><td>Länge:</td><td class='after-m'>" + Styler.styleM(this.length) + "</td></tr><tr><td>Breite:</td><td class='after-m'>" + Styler.styleM(this.width) + "</td></tr><tr><td>Höhe:</td><td class='after-m'>" + Styler.styleM(this.height) + "</td></tr><tr><td>Z-Koordinate (Länge):</td><td class='after-m'>" + Styler.styleM(this.z) + "</td></tr><tr><td>X-Koordinate (Tiefe):</td><td class='after-m'>" + Styler.styleM(this.x) + "</td></tr><tr><td>Y-Koordinate (Höhe):</td><td class='after-m'>" + Styler.styleM(this.y) + "</td></tr><tr><td>Folgenummer</td><td>" + this.seqNr + "</td></tr></tbody></table>";
+        if (this.isRotated) {
             html += "das Gut wurde um die vertikale Achse rotiert";
         } else {
             html += "das Gut wurde nicht um die vertikale Achse rotiert";
@@ -338,12 +328,14 @@ class Input {
         this.cH = 0;
         this.fileHeadline = [];
         this.orders = [];
+        this.algorithm = "SuperFlo";
     }
     /**
      * updated 28.04.2019
      * the method creates the input's content table
      */
-    addListeners() {
+    addListeners(id) {
+        var instance = this;
         if (!$("#cicw").hasClass("click-event-added")) {
             $("#cicw").addClass("click-event-added");
             $("#cicw").on("keyup", function () {
@@ -356,6 +348,14 @@ class Input {
                 runtimeManager.input.cH = parseInt($(this).val());
             });
         }
+        $("#" + id + " .algorithm-overview").each(function () {
+            if (!$(this).hasClass("event-listener-added")) {
+                $(this).addClass("event-listener-added");
+                $(this).click(function () {
+                    instance.selectAlgorithm(id, $(this).data("alg"));
+                });
+            }
+        });
         this.tab = new SortableTable({
             customClass: "orders-table",
             headline: [
@@ -374,6 +374,23 @@ class Input {
         $("#user-input").append(this.tab.generate());
         this.tab.addListener();
         this.tab.fillContent(this.orders);
+    }
+    /**
+     * updated 04.08.2019
+     * the method returns the average dimensions of the orders
+     */
+    get avgOrderDims(){
+        var output = { tW: 0, tL: 0, tH: 0, avgW: 0, avgL: 0, avgH: 0, tO: 0 };
+        for(var index in this.orders){
+            output.tH += (this.orders[index].height * this.orders[index].quantity);
+            output.tW += (this.orders[index].width * this.orders[index].quantity);
+            output.tL += (this.orders[index].length * this.orders[index].quantity);
+            output.tO += this.orders[index].quantity;
+        }
+        output.avgH = output.tH / output.tO;
+        output.avgW = output.tW / output.tO;
+        output.avgL = output.tL / output.tO;
+        return output;
     }
     /**
      * updated 26.04.2019
@@ -423,7 +440,27 @@ class Input {
      */
     generateDetailsLabel() {
         var id = generateId();
-        var html = "<div id='" + id + "'><table class='user-input-tab'><tbody><tr><td>Breite des Containers</td><td class='input'><input class='user-input' type='text' id='cicw' value='" + this.cW + "' /></td><td rowspan='2'><div style='width: 300px; height: 130px; overflow-x: scroll; overflow-y: none; display: none;'></div></td></tr><tr><td>Höhe des Containers</td><td class='input'><input class='user-input' type='text' id='cich' value='" + this.cH + "' /></td></tr><tr><td colspan='2' class='fill-orders' ></td></tr></tbody></table></div>";
+        var icon = "<i class='material-icons icon' style='display: none;'>done</i>";
+        var iconS = "<i class='material-icons icon'>done</i>";
+        var sub = "<span class='subtitle'>Algorithmus auswählen</span>";
+        var subS = "<span class='subtitle'>Algorithmus ausgewählt</span>";
+        var html = "<div id='" + id + "'><div class='approaches-overview' style='display: none; width: 100%;'>";
+        if (this.algorithm == "AllInOneRow") {
+            html += "<div class='algorithm-overview' data-alg='air'>" + iconS + "<span class='headline'>AllInOneRow</span>" + subS + "</div>";
+        } else {
+            html += "<div class='algorithm-overview' data-alg='air'>" + icon + "<span class='headline'>AllInOneRow</span>" + sub + "</div>";
+        }
+        if (this.algorithm == "StartLeftBottom") {
+            html += "<div class='algorithm-overview' data-alg='slb'>" + iconS + "<span class='headline'>StartLeftBottom</span>" + subS + "</div>";
+        } else {
+            html += "<div class='algorithm-overview' data-alg='slb'>" + icon + "<span class='headline'>StartLeftBottom</span>" + sub + "</div>";
+        }
+        if (this.algorithm == "SuperFlo") {
+            html += "<div class='algorithm-overview' data-alg='suf'>" + iconS + "<span class='headline'>SuperFlo</span>" + subS + "</div>";
+        } else {
+            html += "<div class='algorithm-overview' data-alg='suf'>" + icon + "<span class='headline'>SuperFlo</span>" + sub + "</div>";
+        }
+        html += "</div><table class='user-input-tab'><tbody><tr><td>Breite des Containers</td><td class='input'><input class='user-input' type='text' id='cicw' value='" + this.cW + "' /></td><td rowspan='2'><div style='width: 300px; height: 130px; overflow-x: scroll; overflow-y: none; display: none;'></div></td></tr><tr><td>Höhe des Containers</td><td class='input'><input class='user-input' type='text' id='cich' value='" + this.cH + "' /></td></tr><tr><td colspan='2' class='fill-orders' ></td></tr></tbody></table></div>";
         return {
             html: html,
             id: id
@@ -458,6 +495,39 @@ class Input {
         };
     }
     /**
+     * updated 04.08.2019
+     * the method returns the total number of orders
+     */
+    get totalOrderCount(){
+        var output = 0;
+        for(var index in this.orders) output += this.orders[index].quantity;
+        return output;
+    }
+    /**
+     * updated 26.07.2019
+     * the method selects an algorithm
+     */
+    selectAlgorithm(id, code) {
+        $("#" + id + " .algorithm-overview").each(function () {
+            $(this).find(".icon").hide();
+            $(this).find(".subtitle").text("Algorithmus auswählen");
+        });
+        $(".algorithm-overview[data-alg='" + code + "'] .icon").show();
+        $(".algorithm-overview[data-alg='" + code + "'] .subtitle").text("Algorithmus ausgewählt");
+        switch (code) {
+            case "suf":
+                this.algorithm = "SuperFlo";
+                break;
+            case "air":
+                this.algorithm = "AllInOneRow";
+                break;
+            case "slb":
+                this.algorithm = "StartLeftBottom";
+                break;
+            default: throw ("unknown algorithm code: " + code);
+        }
+    }
+    /**
      * updated 26.04.2019
      * the method sends the current instance to the server
      */
@@ -473,14 +543,31 @@ class Input {
                 console.log(instance);
             },
             success: function (result) {
-                console.log(result);
-                var s = new Solution(result);
-                runtimeManager.addSolution(s);
+                console.log("Input erfolgreich übermittelt");
+                runtimeManager.solutions = [];
             },
             error: function (result) {
                 console.log(result);
             }
         });
+    }
+    /**
+     * updated 04.08.2019
+     * the method returns the standard deviation for the current set
+     */
+    get stOrderDev(){
+        var output = { sdevW: 0, sdevL: 0, sdevH: 0, tO: 0, sumW: 0, sumL: 0, sumH: 0, tO: 0 };
+        var avg = this.avgOrderDims;
+        for(var index in this.orders){
+            output.tO += this.orders[index].quantity;
+            output.sumW += Math.pow((this.orders[index].width - avg.avgW), 2) * this.orders[index].quantity;
+            output.sumL += Math.pow((this.orders[index].length - avg.avgL), 2) * this.orders[index].quantity;
+            output.sumH += Math.pow((this.orders[index].height - avg.avgH), 2) * this.orders[index].quantity;
+        }
+        output.sdevW = Math.sqrt(output.sumW / output.tO);
+        output.sdevL = Math.sqrt(output.sumL / output.tO);
+        output.sdevH = Math.sqrt(output.sumH / output.tO);
+        return output;
     }
     /**
      * updated 26.04.2019
@@ -490,7 +577,8 @@ class Input {
         return JSON.stringify({
             "_ContainerHeight": parseFloat(this.cH),
             "_ContainerWidth": parseFloat(this.cW),
-            "_Orders": InputOrder.listToServerObjects(this.orders)
+            "_Orders": InputOrder.listToServerObjects(this.orders),
+            "_Algorithm": this.algorithm
         });
     }
 }
@@ -666,10 +754,8 @@ class RuntimeManager {
      * the constructor generates a new instance of the runtime manager
      */
     constructor() {
-        this.drawEmpty = false;
-        this.emptyIndex = 0;
-        this.renderEmptyIndex = false;
         this.solutions = [];
+        this.solutionFlag = null;
         this.groups = [];
         this.windowState = 0;
         this.input = null;
@@ -677,6 +763,7 @@ class RuntimeManager {
         this.socketConn = new Socket();
         this.mousePosition = new THREE.Vector3(0, 0, 0);
         this.currentGridUUID = null;
+        this.sim = { step: null, o: null, hideLatter: true, tempElements: [], simHelperRegularColor: new THREE.Color("rgb(255, 166, 0)"), simHelperInfinityLengthColor: new THREE.Color("rgb(7, 143, 25)"), simSumedUpColor: new THREE.Color("rgb(0, 255, 238)"), simRecursiveRestrictedColor: new THREE.Color("rgb(237, 26, 79)") };
     }
     /**
      * updated 26.04.2019
@@ -684,19 +771,192 @@ class RuntimeManager {
      */
     addSolution(solution) {
         this.solutions.push(solution);
-        this.setWindowState(1);
-        solution.container.draw();
-        $("#current-solution > *").not(".fixed").remove();
-        var content = solution.generateDetailsLabel();
-        $("#current-solution").prepend(content.html);
-        solution.addDetailsListeners(content.id);
-        $("#current-groups").empty();
-        for (var index in runtimeManager.groups) {
-            var content = runtimeManager.groups[index].generateLabel();
-            $("#current-groups").append(content.html);
-            runtimeManager.groups[index].addLabelListeners(content.id);
+        if (this.solutionFlag == null) {
+            this.setSolution(solution.id);
+        } else {
+            var s = this.solutions.find(x => x.id == this.solutionFlag);
+            console.log(this.solutionFlag);
+            if (s.container.length > solution.container.length) this.setSolution(solution.id);
         }
-        solution.validateChart();
+        var content = solution.generateOverviewLabel();
+        $("#all-solutions").prepend(content.html);
+        solution.addLabelListeners(content.id);
+        if(this.solutions.length > 1){
+            $("#compare-solutions").show();
+        }
+    }
+    /**
+     * updated 05.08.2019
+     * the method clears the current instance
+     */
+    clear(){
+        this.solutions = [];
+        this.solutionFlag = null;
+        $("#all-solutions > *").not("fixed").remove();
+    }
+    /**
+     * updated 03.08.2019
+     * the method returns the current solution
+     */
+    get currentSolution() {
+        return this.solutions.find(x => x.id == this.solutionFlag);
+    }
+    /**
+     * the method does the simulation for the setted step
+     */
+    doSimulation() {
+        var s = this.solutions.find(x => x.id == this.solutionFlag);
+        switch (this.sim.step) {
+            case null:
+                $("#simulation .counter").text("gestoppt");
+                for (var index in s.container.goods) {
+                    s.container.goods[index].mesh.visible = true;
+                    s.container.goods[index].helper.material.color = new THREE.Color("rgb(0, 0, 0)");
+                    s.container.goods[index].helper.visible = true;
+                }
+                break;
+            default:
+                $("#simulation .counter").text(this.sim.step + " von " + s.sequence);
+                for (var index in s.container.goods) {
+                    if (s.container.goods[index].seqNr == this.sim.step) {
+                        s.container.goods[index].mesh.visible = true;
+                        s.container.goods[index].helper.material.color = new THREE.Color("rgb(0, 0, 0)");
+                        s.container.goods[index].helper.visible = true;
+                    } else {
+                        s.container.goods[index].mesh.visible = false;
+                        if (this.sim.hideLatter && s.container.goods[index].seqNr > this.sim.step) {
+                            s.container.goods[index].helper.visible = false;
+                        } else {
+                            s.container.goods[index].helper.material.color = new THREE.Color("rgb(89, 89, 89)");
+                            s.container.goods[index].helper.visible = true;
+                        }
+                    }
+                }
+                var seqSt = s.getStepsForSequenceNumber(this.sim.step);
+                if (seqSt != null) {
+                    console.log(seqSt);
+                    var parentDimension = {
+                        h: s.container.height,
+                        w: s.container.width,
+                        l: s.container.length
+                    };
+                    for (var index in seqSt._Positions) {
+                        var p = seqSt._Positions[index];
+                        if (p._L == null) {
+                            var l = 500;
+                            var color = this.sim.simHelperRegularColor;
+                        } else {
+                            if (p._IsSumedUp) {
+                                var color = this.sim.simSumedUpColor;
+                            } else {
+                                var color = this.sim.simHelperInfinityLengthColor;
+                            }
+                            var l = p._L;
+                        }
+                        var geometry = new THREE.BoxGeometry(p._W, p._H, l, 4, 4, 4);
+                        var material = new THREE.MeshBasicMaterial({ color: color });
+                        var mesh = new THREE.Mesh(geometry, material);
+                        var helper = new THREE.EdgesHelper(mesh, 0x333333);
+                        helper.material.linewidth = 1;
+                        helper.material.color = color;
+                        mesh.position.z = p._Z - (parentDimension.l / 2) + (l / 2);
+                        mesh.position.x = p._X - (parentDimension.w / 2) + (p._W / 2);
+                        mesh.position.y = p._Y - (parentDimension.h / 2) + (p._H / 2);
+                        helper.position.set(mesh.position.x, mesh.position.y, mesh.position.z);
+                        scene.add(helper);
+                        this.sim.tempElements.push(helper);
+                    }
+                    for (var index in seqSt._RecursiveGroupRestricted) {
+                        var p = seqSt._RecursiveGroupRestricted[index];
+                        var l = p._L;
+                        var color = this.sim.simRecursiveRestrictedColor;
+                        var geometry = new THREE.BoxGeometry(p._W, p._H, l, 4, 4, 4);
+                        var material = new THREE.MeshBasicMaterial({ color: color });
+                        var mesh = new THREE.Mesh(geometry, material);
+                        var helper = new THREE.EdgesHelper(mesh, 0x333333);
+                        helper.material.linewidth = 1;
+                        helper.material.color = color;
+                        mesh.position.z = p._Z - (parentDimension.l / 2) + (l / 2);
+                        mesh.position.x = p._X - (parentDimension.w / 2) + (p._W / 2);
+                        mesh.position.y = p._Y - (parentDimension.h / 2) + (p._H / 2);
+                        helper.position.set(mesh.position.x, mesh.position.y, mesh.position.z);
+                        scene.add(helper);
+                        this.sim.tempElements.push(helper);
+                    }
+                    renderer.render(scene, camera);
+                }
+                break;
+        }
+    }
+    /**
+     * updated 03.08.2019
+     * the method fills the solution comparison
+     */
+    fillSolutionComparison(){
+        var avg = runtimeManager.input.avgOrderDims;
+        var svg = runtimeManager.input.stOrderDev;
+        $("#solution-comparison").empty();
+        $("#solution-comparison").append("<div style='display: flex; height: calc(100% - 111.6px);'><div style='flex-grow: 1;'><span style='display: block;text-decoration: underline #4e5b96; font-size: 1.4rem;'><i class='material-icons' style='margin-right: 10px; font-size: 1rem; color: #4e5b96;'>input</i>Angaben zum Dateninput</span><table style='font-size: .8rem;'><tr><td>Breite Container</td><td>" + parseFloat(runtimeManager.input.cW/1000).toFixed(2) + " m</td></tr><tr><td>Höhe Container</td><td>" + parseFloat(runtimeManager.input.cH/1000).toFixed(2) + " m</td></tr><tr><td>Anzahl Güter (insgesamt)</td><td>" + runtimeManager.input.totalOrderCount + " Stück</td></tr><tr><td>Anzahl Bestellungen</td><td>" + runtimeManager.input.orders.length + " Bestellungen</td></tr><tr><td>Anzahl Gruppen</td><td>" + runtimeManager.groups.length + " Gruppen</td></tr><tr><td>Durchschnittliche Güterbreite</td><td>" + parseFloat(avg.avgW/1000).toFixed(2) + " m</td></tr><tr><td>Standardabweichung Güterbreite</td><td>" + parseFloat(svg.sdevW/1000).toFixed(2) + " m</td></tr><tr><td></td><td>" + parseInt((svg.sdevW/avg.avgW) * 100) + " %</td></tr><tr><td>Durchschnittliche Güterhöhe</td><td>" + parseFloat(avg.avgH/1000).toFixed(2) + " m</td></tr><tr><td>Standardabweichung Güterhöhe</td><td>" + parseFloat(svg.sdevH/1000).toFixed(2) + " m</td></tr><tr><td></td><td>" + parseInt((svg.sdevH/avg.avgH) * 100) + " %</td></tr><tr><td>Durchschnittliche Güterlänge</td><td>" + parseFloat(avg.avgL/1000).toFixed(2) + " m</td></tr><tr><td>Standardabweichung Güterlänge</td><td>" + parseFloat(svg.sdevL/1000).toFixed(2) + " m</td></tr><tr><td></td><td>" + parseInt((svg.sdevL/avg.avgL) * 100) + " %</td></tr><tr></table></div><div class='diagram'><canvas id='solution-comparison-chart'></canvas></div>");
+        var ctx = document.getElementById("solution-comparison-chart").getContext("2d");
+        var labels = [];
+        var clData = [];
+        var cutilData = [];
+        for(var index in this.solutions){
+            var s = this.solutions[index];
+            labels.push(s.algorithm);
+            clData.push(parseInt(s.container.length/1000));
+            cutilData.push(parseInt((s.container.getUsedVolume()/s.container.getTotalVolume())*100));
+        }
+        /**
+         * backgroundColor: [
+                        "rgba(170, 255, 51, .6)",
+                        "rgba(150, 150, 150, .6)"
+                    ],
+                    borderColor: [
+                        "rgb(126, 205, 16)",
+                        "rgb(150, 150, 150)"
+                    ]
+         */
+        var myChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Länge des Containers",
+                    yAxisID: "clData",
+                    data: clData,
+                    backgroundColor: "rgba(36, 142, 191, .5)",
+                    borderColor: "rgb(36, 142, 191)",
+                    type: "bar"
+                }, {
+                    label: "Prozentuale Auslastung des Containers",
+                    yAxisID: "cutilData",
+                    data: cutilData,
+                    backgroundColor: "rgba(17, 168, 113, .5)",
+                    borderColor: "rgb(17, 168, 113)",
+                    type: "bar"
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        id: "clData",
+                        type: "linear",
+                        position: "left",
+                        ticks: { beginAtZero: true }
+                    }, {
+                        id: "cutilData",
+                        type: "linear",
+                        position: "right",
+                        ticks: { beginAtZero: true },
+                        gridLines: { display: false }
+                    }]
+                },
+                legend: {
+                    position: "bottom"
+                }
+            }
+        });
     }
     /**
      * updated 26.04.2019
@@ -716,6 +976,16 @@ class RuntimeManager {
             camera.updateProjectionMatrix();
             renderer.setSize(width, height);
         });
+        $(window).on("keyup", function (e) {
+            if (e.ctrlKey && e.which == 186) {
+                e.preventDefault();
+                e.stopPropagation();
+                $("#simulation").toggle();
+            }
+        });
+        $("#compare-solutions").click(function(){
+            instance.setWindowState(2);
+        });
         $(".section-invoker").each(function () {
             if (!$(this).hasClass("click-event-added")) {
                 $(this).addClass("click-event-added");
@@ -728,6 +998,16 @@ class RuntimeManager {
                         $(t).show("blind", 500);
                         $(this).find(".material-icons").text("expand_more");
                     }
+                });
+            }
+        });
+        $("#simulation .icon").each(function () {
+            if (!$(this).hasClass("click-event-added")) {
+                $(this).addClass("click-event-added");
+                $(this).each(function () {
+                    $(this).click(function () {
+                        instance.setSimulationStep($(this).data("action"));
+                    });
                 });
             }
         });
@@ -745,6 +1025,7 @@ class RuntimeManager {
                 var valid = instance.input.isValid();
                 if (valid.value) {
                     instance.input.send();
+                    instance.clear();
                 } else {
                     alert(valid.desc);
                 }
@@ -798,7 +1079,7 @@ class RuntimeManager {
                         case "defaultview":
                             var t = 100;
                             var interval = 10;
-                            Styler.moveThreeJSCamera(t, interval, 45, 3000, 0, 4000);
+                            Styler.moveThreeJSCamera(t, interval, 45, 12000, 5000, 10000);
                             break;
                         case "hide-grid":
                             if (runtimeManager.currentGridUUID != null) {
@@ -891,6 +1172,14 @@ class RuntimeManager {
                 }
             }
         });
+        $(".nav-item[data-action='leave']").each(function () {
+            if (!$(this).hasClass("click-event-added")) {
+                $(this).addClass("click-event-added");
+                $(this).click(function () {
+                    runtimeManager.setWindowState(1);
+                });
+            }
+        });
         $("[data-action='upload-current-config']").each(function () {
             if (!$(this).hasClass("click-event-added")) {
                 $(this).addClass("click-event-added");
@@ -915,22 +1204,6 @@ class RuntimeManager {
                 });
             }
         });
-        $("[data-action='show-empty']").each(function () {
-            if (!$(this).hasClass("click-event-added")) {
-                $(this).addClass("click-event-added");
-                $(this).click(function () {
-                    runtimeManager.toggleEmptySpace();
-                });
-            }
-        });
-        $("[data-action='show-goods']").each(function () {
-            if (!$(this).hasClass("click-event-added")) {
-                $(this).addClass("click-event-added");
-                $(this).click(function () {
-                    runtimeManager.toggleEmptySpace();
-                });
-            }
-        });
         if (!$("#upload-file").hasClass("click-event-added")) {
             $("#upload-file").addClass("click-event-added");
             $("#upload-file").on("change", function () {
@@ -938,6 +1211,7 @@ class RuntimeManager {
                 var reader = new FileReader();
                 reader.onload = function (e) {
                     var i = new Input();
+                    i.algorithm = instance.input.algorithm;
                     i.fromCSV(reader.result);
                     instance.setInput(i);
                 }
@@ -1057,7 +1331,88 @@ class RuntimeManager {
     setInput(input) {
         this.input = input;
         this.setWindowState(0);
-
+    }
+    /**
+     * the method sets the current simulation step
+     */
+    setSimulationStep(step, auto) {
+        var s = this.solutions.find(x => x.id == this.solutionFlag);
+        var instance = this;
+        for (var index in this.sim.tempElements) {
+            scene.remove(this.sim.tempElements[index]);
+        };
+        if (auto !== true) {
+            if (this.sim.o != null && step != "play") {
+                clearInterval(this.sim.o);
+                this.sim.o = null;
+            }
+        }
+        switch (step) {
+            case "stop":
+                this.sim.step = null;
+                $("#simulation .simulation-field .icon[data-action='play']").text("play_arrow");
+                break;
+            case "play":
+                if (this.sim.o == null) {
+                    if (this.sim.step == null) {
+                        this.sim.step = 1;
+                    }
+                    this.sim.o = setInterval(function () {
+                        instance.setSimulationStep("forward", true);
+                    }, 1000);
+                    $("#simulation .simulation-field .icon[data-action='play']").text("pause");
+                } else {
+                    clearInterval(this.sim.o);
+                    this.sim.o = null;
+                    $("#simulation .simulation-field .icon[data-action='play']").text("play_arrow");
+                }
+                break;
+            case "back":
+                if (this.sim.step == 1 || this.sim.step == null) {
+                    this.sim.step = s.sequence;
+                } else {
+                    this.sim.step--;
+                }
+                break;
+            case "forward":
+                if (this.sim.step == s.sequence || this.sim.step == null) {
+                    this.sim.step = 1;
+                } else {
+                    this.sim.step++;
+                }
+                break;
+        }
+        this.doSimulation();
+    }
+    /**
+     * updated 03.08.2019
+     * the method sets a solution for visualization
+     */
+    setSolution(id) {
+        var solution = this.solutions.find(x => x.id == id);
+        this.solutionFlag = id;
+        this.setWindowState(1);
+        solution.container.draw();
+        $("#current-solution > *").not(".fixed").remove();
+        var content = solution.generateDetailsLabel();
+        $("#current-solution").prepend(content.html);
+        solution.addDetailsListeners(content.id);
+        $("#current-groups").empty();
+        for (var index in runtimeManager.groups) {
+            var content = runtimeManager.groups[index].generateLabel();
+            $("#current-groups").append(content.html);
+            runtimeManager.groups[index].addLabelListeners(content.id);
+        }
+        $(".solution-checker").each(function () {
+            if ($(this).data("solution") == id) {
+                $(this).text("check_box");
+                $(this).parent().addClass("active");
+            } else {
+                $(this).text("check_box_outline_blank");
+                $(this).parent().removeClass("active");
+            }
+        });
+        solution.validateChart();
     }
     /**
      * updated 26.04.2019
@@ -1075,7 +1430,7 @@ class RuntimeManager {
                 $(".nav-item[data-action='back-to-input']").hide();
                 var content = this.input.generateDetailsLabel();
                 $("#user-input").append(content.html);
-                this.input.addListeners();
+                this.input.addListeners(content.id);
                 if (this.input.isValid().value) {
                     $("#send-input").removeClass("disabled");
                     $("#ext-solution").css("display", "inline-block");
@@ -1083,7 +1438,8 @@ class RuntimeManager {
                     $("#send-input").addClass("disabled");
                     $("#ext-solution").css("display", "none");
                 }
-                this.loadExamples();
+                $("#solution-comparison").hide();
+                $(".nav-item[data-action='leave']").hide();
                 break;
             case 1:
                 $(".nav-item[data-action='back-to-input']").show();
@@ -1091,29 +1447,58 @@ class RuntimeManager {
                 $("#details").show();
                 $("#graphic").show();
                 $(".footer-row").hide();
-                /*
-                if (runtimeManager.solutions[0].empty.length > 0) {
-                    $(".nav-item[data-action='show-empty']").show();
-                }
-                */
+                $("#solution-comparison").hide();
+                $(".nav-item[data-action='leave']").hide();
+                break;
+            case 2:
+                $(".nav-item[data-action='back-to-input']").hide();
+                $("#user-input").hide();
+                $("#details").hide();
+                $("#graphic").hide();
+                $(".footer-row").hide();
+                $("#solution-comparison").show();
+                $(".nav-item[data-action='leave']").show();
+                this.fillSolutionComparison();
                 break;
         }
     }
+}
+/**
+ * updated 18.06.2019
+ * the class connects the client with the server's web socket
+ */
+class Socket {
     /**
-     * updated 20.06.2019
-     * the method toggles the empty space visualization
+     * updated 18.06.2019
+     * the constructor creates a new instance of a web socket
      */
-    toggleEmptySpace() {
-        if (this.drawEmpty) {
-            this.drawEmpty = false;
-            $(".nav-item[data-action='show-empty']").show();
-            $(".nav-item[data-action='show-goods']").hide();
-        } else {
-            this.drawEmpty = true;
-            $(".nav-item[data-action='show-empty']").hide();
-            $(".nav-item[data-action='show-goods']").show();
-        }
-        this.solutions[0].container.draw();
+    constructor() {
+        this.url = "http://" + serverLocation + "/signalr";
+        this.connection = $.hubConnection(this.url, {
+            useDefaultPath: false
+        });
+        this.notificationProxy = this.connection.createHubProxy("NotificationHub");
+        this.allNotifications = [];
+        this.observers = {
+            onMessage: []
+        };
+        this.startConnection();
+    }
+    /**
+     * updated 18.06.2019
+     * the method starts the connection to the web socket
+     */
+    startConnection() {
+        this.connection.start().done(function (e) {
+            console.log(e);
+        }).fail(function (e, f, g) {
+            console.log(e, f, g);
+        });
+        this.notificationProxy.on("receiveSolution", function (s) {
+            var sol = new Solution(s);
+            console.log(sol);
+            runtimeManager.addSolution(sol);
+        });
     }
 }
 /**
@@ -1126,9 +1511,11 @@ class Solution {
      * the constructor creates a new instance of a solution
      */
     constructor(object) {
+        this.id = generateId();
         this.container = null;
-        this.algorithm = "";
+        this.algorithm = null;
         this.empty = [];
+        this.steps = null;
         if (object != null && typeof (object) != "undefined") {
             if (object._Container != null && typeof (object._Container) != "undefined") {
                 this.container = new Container(object._Container);
@@ -1142,10 +1529,11 @@ class Solution {
                     runtimeManager.groups.push(new Groups(object._Groups[index]));
                 }
             }
-            if (object._Empty != null && typeof (object._Empty) != "undefined") {
-                for (var index in object._Empty) {
-                    this.empty.push(new Empty(object._Empty[index]));
-                }
+            if (object._Steps != null && typeof (object._Steps) != "undefined" && object._Steps.length > 0) {
+                this.steps = object._Steps;
+            }
+            if (object._Duration != null && typeof (object._Duration) != "undefined") {
+                this.duration = object._Duration;
             }
         }
     }
@@ -1166,6 +1554,25 @@ class Solution {
                 download(runtimeManager.solutions[0].toExport(), "export.csv", "text/csv");
             });
         }
+        if (!$("#" + id + " .button[data-target='go-back']").hasClass("click-event-added")) {
+            $("#" + id + " .button[data-target='go-back']").addClass("click-event-added");
+            $("#" + id + " .button[data-target='go-back']").click(function () {
+                runtimeManager.setWindowState(0);
+            });
+        }
+    }
+    /**
+     * updated 03.08.2019
+     * the method adds the event listeners to the details label
+     */
+    addLabelListeners(id) {
+        var instance = this;
+        if (!$("#" + id).hasClass("click-event-added")) {
+            $("#" + id).addClass("click-event-added");
+            $("#" + id).click(function () {
+                runtimeManager.setSolution(instance.id);
+            });
+        }
     }
     /**
      * updated 26.04.2019
@@ -1173,11 +1580,41 @@ class Solution {
      */
     generateDetailsLabel() {
         var id = generateId();
-        var html = "<table id='" + id + "' class='details-table st-mgr-tab'><tbody><tr><td>Gesamtes Containervolumen</td><td class='after-m3'>" + Styler.styleCubicM(this.container.getTotalVolume()) + "</td></tr><tr><td>Davon besetztes Volumen</td><td class='after-m3'>" + Styler.styleCubicM(this.container.getUsedVolume()) + "</td></tr><tr><td>Davon ungenutztes Volumen</td><td class='after-m3'>" + Styler.styleCubicM(this.container.getUnUsedVolume()) + "</td></tr><tr><td>Enthaltene Paletten</td><td>" + this.container.goods.length + "</td></tr><tr><td>Länge des Containers</td><td class='after-m'>" + Styler.styleM(this.container.length) + "</td></tr><tr><td>Höhe des Containers</td><td class='after-m'>" + Styler.styleM(this.container.height) + "</td></tr><tr><td>Breite des Containers</td><td class='after-m'>" + Styler.styleM(this.container.width) + "</td></tr><tr class='no-style'><td colspan='2'><button class='button' data-target='download-solution'><i class='material-icons icon'>save_alt</i>Lösung herunterladen (.json)</button></td></tr><tr><td colspan='2'><button class='button' data-target='export-solution'><i class='material-icons icon'>reply</i>Lösung exportieren (.csv)</button></td></tr><tr><td colspan='2'><button class='button' data-target='go-back'><i class='material-icons icon'>arrow_back</i>Zurück zur Eingabe</button></td></tr></tbody></table>";
+        var html = "<div id='" + id + "'><table class='details-table st-mgr-tab'><tbody><tr><td>Verwendeter Algorithmus</td><td>" + this.algorithm + "</td></tr><tr><td>Berechnungsdauer</td><td>" + this.duration + " ms</td></tr><tr><td>Gesamtes Containervolumen</td><td class='after-m3'>" + Styler.styleCubicM(this.container.getTotalVolume()) + "</td></tr><tr><td>Davon besetztes Volumen</td><td class='after-m3'>" + Styler.styleCubicM(this.container.getUsedVolume()) + "</td></tr><tr><td>Davon ungenutztes Volumen</td><td class='after-m3'>" + Styler.styleCubicM(this.container.getUnUsedVolume()) + "</td></tr><tr><td>Enthaltene Paletten</td><td>" + this.container.goods.length + "</td></tr><tr><td>Länge des Containers</td><td class='after-m'>" + Styler.styleM(this.container.length) + "</td></tr><tr><td>Höhe des Containers</td><td class='after-m'>" + Styler.styleM(this.container.height) + "</td></tr><tr><td>Breite des Containers</td><td class='after-m'>" + Styler.styleM(this.container.width) + "</td></tr></tbody></table>";
+        html += "<canvas id='current-load'></canvas>";
+        html += "<button class='button' data-target='download-solution' data-index='0'><i class='material-icons icon'>save_alt</i>Lösung herunterladen (.json)</button><button class='button' data-target='export-solution' data-index='1'><i class='material-icons icon'>reply</i>Lösung exportieren (.csv)</button><button class='button' data-target='go-back' data-index='0'><i class='material-icons icon'>arrow_back</i>Zurück zur Eingabe</button></div>";
         return {
             html: html,
             id: id
         };
+    }
+    /**
+     * updated 03.08.2019
+     * the method generates the solutions overview model
+     */
+    generateOverviewLabel() {
+        var id = generateId();
+        var u = this.container.getUsedVolume();
+        var t = this.container.getTotalVolume();
+        if (this.id == runtimeManager.solutionFlag) {
+            var html = "<div class='overview-label active' id='" + id + "'><i class='material-icons overview-label-icon solution-checker' data-solution='" + this.id + "'>check_box</i>";
+        } else {
+            var html = "<div class='overview-label' id='" + id + "'><i class='material-icons overview-label-icon solution-checker' data-solution='" + this.id + "'>check_box_outline_blank</i>";
+        }
+        html += "<span class='headline'>" + this.algorithm + "</span><div class='data' style='display: grid;'><div style='grid-row: 1; grid-column: 1;'>Berechnete Containerlänge</div><div style='grid-row: 1; grid-column: 2;'>" + parseFloat(this.container.length / 1000).toFixed(2) + "m</div><div style='grid-row: 2; grid-column: 1;'>Berechnete Auslastung</div><div style='grid-row: 2; grid-column: 2;'>" + parseInt((u / t) * 100) + "%</div></div></div>";
+        return {
+            html: html,
+            id: id
+        };
+    }
+    /**
+     * the method returns all information about the sequence steop with the given id
+     */
+    getStepsForSequenceNumber(number) {
+        if (this.steps != null) {
+            return this.steps.find(x => x._SequenceNumber == number);
+        }
+        return null;
     }
     /**
      * updated 18.05.2019
@@ -1205,6 +1642,12 @@ class Solution {
             output += g.group + "," + g.x + "," + g.y + "," + g.z + "," + r + "\n";
         }
         return output;
+    }
+    /**
+     * the method returns the number of sequence steps in the current solution
+     */
+    get sequence() {
+        return Math.max(...this.container.goods.map(x => x.seqNr));
     }
     /**
      * updated 16.05.2019
@@ -1239,11 +1682,11 @@ class Solution {
                     label: "Anteil",
                     data: [a, b],
                     backgroundColor: [
-                        "rgba(62, 145, 72, .6)",
+                        "rgba(170, 255, 51, .6)",
                         "rgba(150, 150, 150, .6)"
                     ],
                     borderColor: [
-                        "rgb(62, 145, 72)",
+                        "rgb(126, 205, 16)",
                         "rgb(150, 150, 150)"
                     ]
                 }]

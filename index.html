@@ -16,6 +16,8 @@
     <script src="lib/Chart.min.js"></script>
     <script src="lib/jquery.signalR.js"></script>
     <script src="lib/download.min.js"></script>
+    <script src="lib/chartjs-plugin-datalabels.min.js"></script>
+    <script src="lib/moment.js"></script>
 </head>
 
 <body>
@@ -33,14 +35,12 @@
         <span class="nav-item" style="display: none;" data-action="back-to-input">
             Zurück zur Übersicht
         </span>
-        <span class="nav-item" style="display: none;" data-action="show-empty">
-            Leerräume visualisieren
-        </span>
-        <span class="nav-item" style="display: none;" data-action="show-goods">
-            Güter visualisieren
+        <span class="nav-item" style="display: none;" data-action="leave">
+            Schließen
         </span>
     </div>
     <div id="user-input"></div>
+    <div id="solution-comparison"></div>
     <div class="footer-row">
         <div id="ext-solution" class="footer-row-btn set-external-solution-btn">
             <i class='material-icons'>input</i>
@@ -70,22 +70,48 @@
                 <i class="material-icons empty-space-control-icon" data-target="run">play_arrow</i>
             </div>
         </div>
-        <div class="section-invoker" data-target="current-solution">
+        <div class="section-invoker" data-index="0" data-target="current-solution">
             <i class="material-icons">expand_more</i>
             Aktueller Lösungsvorschlag
         </div>
-        <div id="current-solution">
-            <canvas id="current-load" class="fixed"></canvas>
-        </div>
-        <div class="section-invoker" data-target="all-solutions">
-            <i class="material-icons">chevron_right</i>
+        <div id="current-solution"></div>
+        <div class="section-invoker" data-index="1" data-target="all-solutions">
+            <i class="material-icons">expand_more</i>
             Weitere Lösungsvorschläge
         </div>
-        <div class="section-invoker" data-target="current-groups">
+        <div id="all-solutions">
+            <button class="button fixed" id="compare-solutions" data-target="compare-solutions" data-index="0">
+                <i class="material-icons icon">timeline</i>
+                Lösungen vergleichen
+            </button>
+        </div>
+        <div class="section-invoker" data-index="0" data-target="current-groups">
             <i class="material-icons">chevron_right</i>
             Gütergruppen
         </div>
+        <div class="section-invoker" data-target="simulation" style="display: none;">
+            <i class="material-icons">chevron_right</i>
+            Simulation
+        </div>
         <div id="current-groups"></div>
+        <div id="simulation">
+            <div class="counter">gestoppt</div>
+            <div style="display: flex; padding: 10px; border-top: 1px solid grey; margin: 0 10px 10px 10px;">
+                <div class="simulation-field">
+                    <i class="material-icons icon" data-action="back">fast_rewind</i>
+                </div>
+                <div class="simulation-field">
+                    <i class="material-icons icon" data-action="play" style="font-size: 3rem; top: 0px;">play_arrow</i>
+                </div>
+                <div class="simulation-field">
+                        <i class="material-icons icon" data-action="stop" style="font-size: 3rem; top: 0px;">stop</i>
+                    </div>
+                <div class="simulation-field">
+                    <i class="material-icons icon" data-action="forward">fast_forward</i>
+                </div>
+            </div>
+
+        </div>
     </div>
     <div id="graphic">
         <div id="graphic-inner">
@@ -111,14 +137,14 @@
     <input type="file" id="upload-ext-sol" accept=".csv" />
     <script>
         // LOCAL
-        var serverLocation = "localhost:65384";
+        //var serverLocation = "localhost:65384";
         // SERVER
-        //var serverLocation = "213.244.192.71:82";
+        var serverLocation = "213.244.192.71:82";
         var runtimeManager = new RuntimeManager();
         var renderH = $("#graphic").height();
         var renderW = $("#graphic").width();
-        var camera = new THREE.PerspectiveCamera(45, renderW / renderH, 1, 1000000);
-        camera.position.set(3000, 0, 4000);
+        var camera = new THREE.PerspectiveCamera(45, renderW / renderH, 1, 10000000);
+        camera.position.set(12000, 5000, 10000);
         var scene = new THREE.Scene();
         scene.background = new THREE.Color("white");
         var renderer = new THREE.WebGLRenderer({ antialias: true });

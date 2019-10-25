@@ -14,34 +14,6 @@ function generateId() {
     }
 }
 /**
- * updated 26.04.2019
- * the class connects the web socket
- */
-class Socket {
-    constructor() {
-        /*
-        var s = new WebSocket("ws://" + serverLocation);
-        s.onopen = function (text, h) {
-            console.log(text);
-        };
-        s.onmessage = function (e) {
-            console.log(e);
-        };
-        var instance = this;
-        $.ajax({
-            type: "GET",
-            url: "http://" + serverLocation + "/api/socket",
-            success: function (result) {
-                instance.id = result;
-            },
-            error: function (result) {
-                console.log(result);
-            }
-        });
-        */
-    }
-}
-/**
  * updated 26.02.2019
  * the method generates a sortable table
  */

@@ -16,6 +16,12 @@ body {
     vertical-align: middle;
     padding: 10px;
 }
+.grop-preview {
+    padding: 5px 10px;
+}
+.grop-preview input {
+    margin-right: 10px;
+}
 .navbar .welcome-icon {
     position: relative;
     top: 4px;
@@ -124,7 +130,7 @@ input.user-input {
     color: grey;
 }
 .st-mgr-tab {
-    width: calc(100% - 40px);
+    width: calc(100% - 10px);
     border: none;
     border-collapse: collapse;
     margin: 5px 20px 20px 20px;
@@ -181,17 +187,18 @@ input.user-input {
     background-color: white;
 }
 .details-table {
-    font-size: .6rem;
+    font-size: .7rem;
     white-space: nowrap;
+    margin: 5px;
 }
-.st-mgr-tab tr:not(.no-style):nth-child(even) {
-    background-color: rgb(246, 246, 246);
+.st-mgr-tab tr:not(.no-style):nth-child(odd) {
+    background-color: rgb(239, 240, 247);
 }
 .details-table tr td:nth-child(2) {
     text-align: left;
 }
 .details-table td {
-    padding: .2rem;
+    padding: 5px 10px;
 }
 .invoker {
     color: white;
@@ -233,15 +240,26 @@ input.user-input {
 .invoker > .material-icons:hover {
     color: rgb(0, 140, 255);
 }
+#details .section-invoker[data-index='0'] {
+    background-color: #4a4b4b;
+}
+#details .section-invoker[data-index='1'] {
+    background-color: #5e5e5e;
+}
 .section-invoker {
+    color: white;
     font-size: 1rem;
     padding: .5rem;
-    font-weight: bold;
     cursor: pointer;
+    user-select: none;
 }
 .section-invoker .material-icons {
-    margin-right: 5px;
+    margin-right: 10px;
     font-size: .8rem;
+    padding: 1px;
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, .2);
+    border: .5px solid rgba(255, 255, 255, .4);
 }
 #upload-file, #upload-sol {
     display: none;
@@ -338,20 +356,135 @@ input.user-input {
     margin-left: -.5rem;
 }
 .button {
+    outline: none;
     width: 100%;
     text-align: left;
-    font-size: .7rem;
-    padding: 0px;
+    font-size: .8rem;
+    padding: 8px 1rem;
     cursor: pointer;
-    border: 0px solid rgba(0,0,0,.4);
-    color: rgba(0,0,0,.7);
-    background-color: #afafaf36;
-    font-weight: bold;
+    border: none;
+    color: #434343;
+}
+.button:hover {
+    background-color: rgb(226, 226, 226) !important;
+}
+.button[data-index='0'] {
+    background-color: rgb(230, 230, 230);
+}
+.button[data-index='1'] {
+    background-color: rgb(241, 241, 241);
 }
 .button .icon {
+    font-size: .8rem;
+    margin-right: 10px;
+    background-color: rgba(126, 126, 126, 0.25);
+    color: #454545;
+    padding: 5px;
+    border-radius: 20px;
+}
+.algorithm-overview {
+    flex-grow: 1;
+    text-align: center;
+    padding: 20px 0px 60px 0px;
+    position: relative;
+    cursor: pointer;
+}
+.algorithm-overview:hover {
+    background-color: #f0fbff;
+    border-radius: 5px;
+}
+.algorithm-overview .icon {
+    display: block;
+    font-size: 20px;
+    position: absolute;
+    bottom: 15px;
+    left: calc(50% - 15px);
+    padding: 5px;
+    border-radius: 50px;
+    color: #558e55;
+    border: 2px solid;
+}
+.algorithm-overview .headline {
+    display: block;
+}
+.algorithm-overview .subtitle {
+    font-size: .6rem;
+    color: grey;
+}
+#simulation {
+    border: 2px solid #282870;
+    margin: 5px;
+    padding: 10px;
+}
+#simulation .counter {
+    text-align: center;
+    font-size: 40px;
+    display: block;
+    width: 100%;
+    color: #282870;
+}
+#simulation .simulation-field {
+    flex-grow: 1;
+    text-align: center;
+}
+#simulation .simulation-field .icon {
+    cursor: pointer;
+    color: #474747;
+    padding: 3px;
+    border: 1px solid;
+    border-radius: 50px;
+    vertical-align: middle;
+    font-size: 20px;
+    position: relative;
+    top: calc(50% - 13px);
+    background-color: #6587b61c;
+    box-shadow: inset 0px 0px 2px 0px rgba(0,0,0,0.75);
+    user-select: none;
+}
+#simulation .simulation-field .icon:hover {
+    background-color: #6587b63a;
+}
+#all-solutions .overview-label:nth-child(odd) {
+    background-color: #172d8e12;
+}
+#all-solutions .overview-label:nth-child(even) {
+    background-color: white;
+}
+.overview-label {
+    padding: 10px 20px 10px 40px;
+    margin: 5px;
+    position: relative;
+    cursor: pointer;
+    border: 3px solid #e6e6e6;
+}
+.overview-label.active {
+    border-color: #7ecd10;
+}
+.overview-label .data {
     font-size: .7rem;
-    margin-right: 5px;
-    background-color: rgba(0,0,0,.7);
-    color: white;
-    padding: 7px;
+}
+.overview-label-icon {
+    font-size: 20px;
+    position: absolute;
+    top: calc(50% - 10px);
+    left: 5px;
+    color: grey;
+}
+#compare-solutions {
+    display: none;
+}
+#solution-comparison {
+    max-height: calc(100% - 111.6px);
+    background-color: white;
+    max-width: calc(100% - 60px);
+    display: none;
+    padding: 30px;
+}
+#solution-comparison .diagram {
+    flex-grow: 2;
+    vertical-align: middle;
+    line-height: 100%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
 }
