@@ -536,7 +536,7 @@ class Input {
         var data = instance.toServerObject();
         $.ajax({
             type: "POST",
-            url: "http://" + serverLocation + "/api/upload",
+            url: serverLocation + "/api/upload",
             contentType: "application/json",
             data: data,
             beforeSend: function () {
@@ -1473,7 +1473,7 @@ class Socket {
      * the constructor creates a new instance of a web socket
      */
     constructor() {
-        this.url = "http://" + serverLocation + "/signalr";
+        this.url = serverLocation + "/signalr";
         this.connection = $.hubConnection(this.url, {
             useDefaultPath: false
         });
