@@ -1,6 +1,6 @@
 # Storage Manager (Web Client)
 
-Live Demo: https://sebleich.github.io/storage-mgmr-frontend/
+Live Demo: https://sebleich.github.io/storage-mgmr-frontend/ (please use Google Chrome)
 
 The reposiotry contains a javascript web client for storage manager's solution visualization. The application was implemented in 2019 for  "IM Challenge" (TU Dresden).
 
