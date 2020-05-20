@@ -2,8 +2,8 @@
 
 Live Demo: https://sebleich.github.io/storage-mgmr-frontend/
 
-The project contains a c#-backend for calculating the best combination of a given data set of orders. The application was implemented in 2019 for the "IM Challenge" at TU Dresden.
+The reposiotry contains a javascript web client for storage manager's solution visualization. The application was implemented in 2019 for  "IM Challenge" (TU Dresden).
 
 The frontend was implemented using jQuery and three.js, a library for 3D web rendering.
 
-![Preview of a simple solution](data/preview.png)
+![Preview of a solution](data/preview.png)
