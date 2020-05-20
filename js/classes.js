@@ -310,7 +310,8 @@ class Good extends Drawable {
             _Stack: this.stackable,
             _X: this.x,
             _Y: this.y,
-            _Z: this.z
+            _Z: this.z,
+            _SequenceNr: this.seqNr
         };
     }
 }
@@ -832,7 +833,6 @@ class RuntimeManager {
                 }
                 var seqSt = s.getStepsForSequenceNumber(this.sim.step);
                 if (seqSt != null) {
-                    console.log(seqSt);
                     var parentDimension = {
                         h: s.container.height,
                         w: s.container.width,
@@ -1659,7 +1659,8 @@ class Solution {
         return {
             _Container: this.container.toServerObject(),
             _Algorithm: this.algorithm,
-            _Groups: groups
+            _Groups: groups,
+            _Steps: this.steps
         };
     }
     /**
