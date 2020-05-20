@@ -544,7 +544,6 @@ class Input {
             },
             success: function (result) {
                 console.log("Input erfolgreich übermittelt");
-                runtimeManager.solutions = [];
             },
             error: function (result) {
                 console.log(result);
@@ -761,7 +760,7 @@ class RuntimeManager {
         this.input = null;
         this.init();
         this.socketConn = new Socket();
-        this.mousePosition = new THREE.Vector3(0, 0, 0);
+        this.mousePosition = new THREE.Vector3(0.7, -0.25, 0);
         this.currentGridUUID = null;
         this.sim = { step: null, o: null, hideLatter: true, tempElements: [], simHelperRegularColor: new THREE.Color("rgb(255, 166, 0)"), simHelperInfinityLengthColor: new THREE.Color("rgb(7, 143, 25)"), simSumedUpColor: new THREE.Color("rgb(0, 255, 238)"), simRecursiveRestrictedColor: new THREE.Color("rgb(237, 26, 79)") };
     }
@@ -775,7 +774,6 @@ class RuntimeManager {
             this.setSolution(solution.id);
         } else {
             var s = this.solutions.find(x => x.id == this.solutionFlag);
-            console.log(this.solutionFlag);
             if (s.container.length > solution.container.length) this.setSolution(solution.id);
         }
         var content = solution.generateOverviewLabel();
@@ -1545,7 +1543,7 @@ class Solution {
         if (!$("#" + id + " .button[data-target='download-solution']").hasClass("click-event-added")) {
             $("#" + id + " .button[data-target='download-solution']").addClass("click-event-added");
             $("#" + id + " .button[data-target='download-solution']").click(function () {
-                download(JSON.stringify(runtimeManager.solutions[0].toServerObject()), "solution.json", "application/json");
+                download(JSON.stringify(runtimeManager.currentSolution.toServerObject()), "solution.json", "application/json");
             });
         }
         if (!$("#" + id + " .button[data-target='export-solution']").hasClass("click-event-added")) {

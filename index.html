@@ -171,6 +171,11 @@
             controls.update();
             renderer.render(scene, camera);
         }
+        $(document).ready(() => {
+            runtimeManager.addSolution(new Solution({"_Container":{"_Height":1900,"_Width":1700,"_Length":2462,"_Goods":[{"_Desc":"EuroPallet4","_Height":389,"_Group":1,"_Width":814,"_Length":1231,"_Rotate":false,"_Stack":true,"_X":0,"_Y":0,"_Z":0},{"_Desc":"EuroPallet4","_Height":389,"_Group":1,"_Width":814,"_Length":1231,"_Rotate":false,"_Stack":true,"_X":0,"_Y":389,"_Z":0},{"_Desc":"EuroPallet4","_Height":389,"_Group":1,"_Width":814,"_Length":1231,"_Rotate":false,"_Stack":true,"_X":814,"_Y":0,"_Z":0},{"_Desc":"EuroPallet4","_Height":389,"_Group":1,"_Width":814,"_Length":1231,"_Rotate":false,"_Stack":true,"_X":0,"_Y":778,"_Z":0},{"_Desc":"EuroPallet4","_Height":389,"_Group":1,"_Width":814,"_Length":1231,"_Rotate":false,"_Stack":true,"_X":814,"_Y":389,"_Z":0},{"_Desc":"EuroPallet4","_Height":389,"_Group":1,"_Width":814,"_Length":1231,"_Rotate":false,"_Stack":true,"_X":0,"_Y":1167,"_Z":0},{"_Desc":"EuroPallet4","_Height":389,"_Group":1,"_Width":814,"_Length":1231,"_Rotate":false,"_Stack":true,"_X":814,"_Y":778,"_Z":0},{"_Desc":"EuroPallet4","_Height":389,"_Group":1,"_Width":814,"_Length":1231,"_Rotate":false,"_Stack":true,"_X":814,"_Y":1167,"_Z":0},{"_Desc":"EuroPallet4","_Height":389,"_Group":1,"_Width":814,"_Length":1231,"_Rotate":false,"_Stack":true,"_X":0,"_Y":0,"_Z":1231},{"_Desc":"EuroPallet4","_Height":389,"_Group":1,"_Width":814,"_Length":1231,"_Rotate":false,"_Stack":true,"_X":0,"_Y":389,"_Z":1231}]},"_Algorithm":"SuperFlo","_Groups":[{"_Color":"#759B9A","_Id":1}]}));
+            camera.fov = 20;
+            camera.updateProjectionMatrix();
+        });
     </script>
 </body>
 
